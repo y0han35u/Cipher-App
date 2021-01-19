@@ -1,0 +1,15 @@
+version: "3"
+services: 
+        vue3:
+                image: vue-cli3:0
+                build:
+                        context: .
+                        dockerfile: Dockerfile
+                container_name: vue3-cli
+                ports:
+                        - "8080:8080"
+                volumes:
+                        - ./app:/app
+                stdin_open: true
+                tty: true
+
