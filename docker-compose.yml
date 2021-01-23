@@ -1,4 +1,6 @@
 version: "3"
+volumes:
+        node-modules-vue3:
 services: 
         vue3:
                 image: vue-cli3:0
@@ -9,8 +11,8 @@ services:
                 ports:
                         - "8080:8080"
                 volumes:
-                        - ./app:/app
-                        - /app/cipher-app/node_modules
+                        - "./app:/app"
+                        - "node-modules-vue3:/app/cipher-app/node_modules"
                 stdin_open: true
                 tty: true
 
