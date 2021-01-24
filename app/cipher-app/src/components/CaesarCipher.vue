@@ -1,42 +1,52 @@
 <template>
     <h1>Caesar Cipher</h1>
-    <textarea name="contents" id="contents" cols="30" rows="10" placeholder="Enter your text."></textarea>
+    <textarea v-model="data.text" name="contents" id="contents" cols="30" rows="10" placeholder="Enter your text."></textarea>
     <div class="selector">
+        <p>chose encryption key</p>
+        
         <label for="rot-key">ROT:</label>
-        <select name="rot-opt" id="rot-key">
-            <option value="" selected>--select your encryption key--</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>
-            <option value="6">6</option>
-            <option value="7">7</option>
-            <option value="8">8</option>
-            <option value="9">9</option>
-            <option value="10">10</option>
-            <option value="11">11</option>
-            <option value="12">12</option>
-            <option value="13">13</option>
-            <option value="14">14</option>
-            <option value="15">15</option>
-            <option value="16">16</option>
-            <option value="17">17</option>
-            <option value="18">18</option>
-            <option value="19">19</option>
-            <option value="20">20</option>
-            <option value="21">21</option>
-            <option value="22">22</option>
-            <option value="23">23</option>
-            <option value="24">24</option>
-            <option value="25">25</option>
-            <option value="26">26</option>
+        <select v-model="data.rot_key" id="rot-key">
+            <option value="" disabled>select the key.</option>
+            <option v-for="n in 26" :key="n" value="n">{{ n }}</option>
         </select>
     </div>
+
+    <form>
+        <p>Encrypt or Decrypt?</p>
+
+        <div>
+            <input type="radio" v-model="ed_flag" id="enc" name="enc_dec" checked>
+            <label for="enc">Encrypt</label>
+
+            <input type="radio" v-model="ed_flag" id="dec" name="enc_dec">
+            <label for="dec">Decrypt</label>
+        </div>
+    </form>
+
+    <button>GO</button>
 </template>
 
 <script>
+import { reactive } from 'vue'
+
 export default {
-    
+    setup() {
+        const data = reactive({
+            text: '',
+            rot_key: 0,
+            ed_flag: '',
+            text_list: [],
+        })
+
+        const CaesarCipher = ()=> {
+            //script
+        }
+
+        const doAction = ()=> {
+            //script
+        }
+
+        return { data, CaesarCipher, doAction }
+    }
 }
 </script>
