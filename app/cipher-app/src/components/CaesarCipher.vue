@@ -1,7 +1,7 @@
 <template>
     <div class="header">
         <button @click="doLogin">{{ data.status_msg }}</button>
-        <p v-if="data.user">Hello! {{ data.user }}</p>
+        <p v-if="data.user">Hello! {{ data.user.displayName }}</p>
     </div>
     <h1>Caesar Cipher</h1>
     <textarea v-model="data.text" name="contents" id="contents" cols="30" rows="10" placeholder="Enter your text."></textarea>
@@ -33,10 +33,10 @@
           <li v-for="(item, key) in data.fire_data" :key="key">{{ item.text }}</li> 
         </ul>
     </div>
-id
+
     <div class="list2" v-if="data.user == null">
         <ul>
-            <li v-for="item in data.obj_list" :key="item.key">{{ item.text }}</li>
+            <li v-for="item in data.obj_list" :key="item.id">{{ item.text }}</li>
         </ul>
     </div>
 </template>
@@ -112,23 +112,26 @@ export default {
             let d = new Date()
             let dstr = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate() + ' ' + d.getHours() + ':' + d.getMinutes() + ':' + d.getSeconds()
             let id = d.getTime()
-            return {time: dstr, id: id}
+            let obj = {time: dstr, id: id}
+            console.log('GCTI' + JSON.stringify(obj))
+            return obj
         }
 
         const doAction = (text, rot_key, ed_flag)=> {
             console.log(text, rot_key, ed_flag)
-            let user = firebase.auth().currentUser
             let timeId = getCreateTimeId()
             let id = timeId.id
-            let obj = {
-                text: CaesarCipher(text, rot_key, ed_flag),
-                user: user.displayName,
-                posted: timeId.time,
-                cryptType: 'CaesarCipher',
-            }
+            
             if(data.user != null){
+                let user = firebase.auth().currentUser
+                let obj = {
+                    text: CaesarCipher(text, rot_key, ed_flag),
+                    user: user.displayName,
+                    posted: timeId.time,
+                    cryptType: 'CaesarCipher',
+                }
                 firebase.database().ref('data/' + id).set(obj)
-                data.obj_list = []
+                console.log('doAction firebase' + JSON.stringify(obj))
             } else {
                 let lcl_obj = {
                     text: CaesarCipher(text, rot_key, ed_flag),
@@ -137,6 +140,8 @@ export default {
                     cryptType: 'CaesarCipher',
                 }
                 data.obj_list.unshift(lcl_obj)
+                console.log('doAction local' + JSON.stringify(lcl_obj))
+                console.log('data.obj_list' + data.obj_list)
             }
             
         }
@@ -144,29 +149,33 @@ export default {
         const login = ()=> {
             firebase.auth().signInWithPopup(provider).then((result)=> {
                 data.user = result.user
+                console.log('login' + data.user.displayName)
                 if (data.obj_list.length) {
-                    for(let item in data.obj_list){
+                    data.obj_list.forEach(item => {
+                        console.log(' item ' + JSON.stringify(item))
                         let id = item.id
                         let obj = {
                             text: item.text,
                             user: firebase.auth().currentUser.displayName,
-                            posted: item.time,
+                            posted: item.posted,
                             cryptType: 'CaesarCipher',
                         }
                         firebase.database().ref('data/' + id).set(obj)
-                    }
+                        console.log('push item ' + JSON.stringify(item))
+                    });
                     data.obj_list = []
+                    console.log('Login and push local obj')
                 }
-                firebase.database().ref('data').once('value', (snapshot)=>{
+                firebase.database().ref('data').orderByChild('user').equalTo(firebase.auth().currentUser.displayName).on('value', (snapshot)=>{
                     if (firebase.auth().currentUser != null) {
-                        console.log(snapshot)
+                        console.log('get snap'+snapshot)
                         let arr = []
                         let result = snapshot.val()
-                        console.log(result)
+                        console.log('get result' + result)
                         for(let item in result){
                             arr.unshift(result[item])
                         }
-                        console.log(arr)
+                        console.log('get arr' + arr)
                         data.fire_data = arr
                         data.status_msg = 'Logout'
                     } else {
@@ -181,10 +190,12 @@ export default {
             data.user = null
             data.status_msg = 'Login'
             data.obj_list = []
+            console.log('logout')
         }
 
         const doLogin = ()=> {
             if(firebase.auth().currentUser == null){
+                console.log(firebase.auth().currentUser)
                 login()
             } else {
                 logout()
