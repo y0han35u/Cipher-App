@@ -47,13 +47,14 @@ import firebase from 'firebase'
 
 // Your web app's Firebase configuration
 var firebaseConfig = {
-   apiKey: "AIzaSyCUhuV-5NE699PnLQ4akulxUsa-giMM0VY",
-   authDomain: "cipher-app-71877.firebaseapp.com",
-   projectId: "cipher-app-71877",
-   storageBucket: "cipher-app-71877.appspot.com",
-   messagingSenderId: "628117390597",
-   appId: "1:628117390597:web:d9ec107576e3b5bdbc636c"
+   apiKey:  process.env.VUE_APP_FIREBASE_API_KEY,
+   authDomain: process.env.VUE_APP_FIREBASE_AUTH_DOMAIN,
+   projectId: process.env.VUE_APP_FIREBASE_PROJECT_ID,
+   storageBucket: process.env.VUE_APP_FIREBASE_STORAGE_BUCKET,
+   messagingSenderId: process.env.VUE_APP_FIREBASE_MESSAGING_SENDER_ID,
+   appId: process.env.VUE_APP_APP_ID 
 };
+console.log(process.env.VUE_APP_FIREBASE_API_KEY)
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
