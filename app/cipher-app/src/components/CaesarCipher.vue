@@ -1,8 +1,12 @@
 <template>
-    <div class="header">
-        <button @click="doLogin">{{ data.status_msg }}</button>
+    <header> 
         <p v-if="data.user">Hello! {{ data.user.displayName }}</p>
-    </div>
+	<p v-else>Hi! there!</p>
+        <button @click="doLogin">{{ data.status_msg }}</button>
+    </header>
+    
+    <main>
+    <section>
     <h1>Caesar Cipher</h1>
     <textarea v-model="data.text" name="contents" id="contents" cols="30" rows="10" placeholder="Enter your text."></textarea>
     <div class="selector">
@@ -27,18 +31,22 @@
     </form>
 
     <button @click="doAction(data.text, data.rot_key, data.ed_flag)">GO</button>
-
+    </section>
+    
     <div class="list" v-if="data.user">
         <ul>
           <li v-for="(item, key) in data.fire_data" :key="key">{{ item.text }}</li> 
         </ul>
     </div>
 
+
+
     <div class="list2" v-if="data.user == null">
         <ul>
             <li v-for="item in data.obj_list" :key="item.id">{{ item.text }}</li>
         </ul>
     </div>
+    </main>
 </template>
 
 <script>
@@ -207,3 +215,42 @@ export default {
     }
 }
 </script>
+
+<style>
+header {
+	background-color: orange;
+	display: flex;
+	width: 100%;
+	height: 100px;
+	align-items: center;
+}	
+
+header p { 
+	margin-right: auto;
+	font-size: 25px;
+	padding: 10px;
+}
+
+header button { 
+	margin-right: 20px;
+	padding: 10px;
+	background-color: skyblue;
+	color: white;
+}
+
+main { 
+	background-color: black;
+	color: white;
+	padding-bottom: 100%;
+	font-size: 20px;
+}
+
+section > h1 { 
+	font-size: 50px;
+	padding-top: 25px;
+}
+
+section > button {
+	margin-top: 10px;
+}
+</style>
