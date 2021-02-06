@@ -34,17 +34,43 @@
     </section>
     
     <div class="list" v-if="data.user">
-        <ul>
-          <li v-for="(item, key) in data.fire_data" :key="key">{{ item.text }}</li> 
-        </ul>
+	<table>
+		<caption>Your Result List</caption>
+		<thead>
+			<tr>
+				<th scope="col">TEXT</th>
+				<th scope="col">KEY</th>
+				<th scope="col">POSTED</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr v-for="(item, key) in data.fire_data" :key="key">
+				<td>{{item.text}}</td>
+				<td>{{item.key}}</td>
+				<td>{{item.posted}}</td>
+			</tr>
+		</tbody>
+	</table>
     </div>
 
-
-
     <div class="list2" v-if="data.user == null">
-        <ul>
-            <li v-for="item in data.obj_list" :key="item.id">{{ item.text }}</li>
-        </ul>
+	<table>
+		<caption>Your Result List</caption>
+		<thead>
+			<tr>
+				<th scope="col">TEXT</th>
+				<th scope="col">KEY</th>
+				<th scope="col">POSTED</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr v-for="item in data.obj_list" :key="item.id">
+				<td>{{item.text}}</td>
+				<td>{{item.key}}</td>
+				<td>{{item.posted}}</td>
+			</tr>
+		</tbody>
+	</table>
     </div>
     </main>
 </template>
@@ -135,6 +161,7 @@ export default {
                 let user = firebase.auth().currentUser
                 let obj = {
                     text: CaesarCipher(text, rot_key, ed_flag),
+                    key: rot_key,
                     user: user.displayName,
                     posted: timeId.time,
                     cryptType: 'CaesarCipher',
@@ -144,6 +171,7 @@ export default {
             } else {
                 let lcl_obj = {
                     text: CaesarCipher(text, rot_key, ed_flag),
+                    key: rot_key,
                     id: id,
                     posted: timeId.time,
                     cryptType: 'CaesarCipher',
@@ -165,6 +193,7 @@ export default {
                         let id = item.id
                         let obj = {
                             text: item.text,
+                            key: item.key,
                             user: firebase.auth().currentUser.displayName,
                             posted: item.posted,
                             cryptType: 'CaesarCipher',
@@ -253,4 +282,31 @@ section > h1 {
 section > button {
 	margin-top: 10px;
 }
+
+table {
+	table-layout: fixed;
+	width: 100%;
+	margin-top: 50px;
+}
+
+table caption {
+	padding-bottom: 20px;
+	font-size: 30px;
+}
+
+thead th:nth-child(1) {
+  width: 60%;
+}
+
+thead th:nth-child(2) {
+  width: 10%;
+}
+
+thead th:nth-child(3) {
+  width: 30%;
+}
+
+tbody td:nth-child(1) {
+  word-break: break-all;
+} 
 </style>
