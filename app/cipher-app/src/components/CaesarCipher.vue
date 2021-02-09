@@ -41,6 +41,7 @@
 				<th scope="col">TEXT</th>
 				<th scope="col">KEY</th>
 				<th scope="col">POSTED</th>
+				<th scope="col">DELETE</th>
 			</tr>
 		</thead>
 		<tbody>
@@ -48,6 +49,7 @@
 				<td>{{item.text}}</td>
 				<td>{{item.key}}</td>
 				<td>{{item.posted}}</td>
+				<td><button @click="fireRemove(key)">Delete</button></td>
 			</tr>
 		</tbody>
 	</table>
@@ -61,13 +63,15 @@
 				<th scope="col">TEXT</th>
 				<th scope="col">KEY</th>
 				<th scope="col">POSTED</th>
+				<th scope="col">DELETE</th>
 			</tr>
 		</thead>
 		<tbody>
-			<tr v-for="item in data.obj_list" :key="item.id">
+			<tr v-for="(item, index) in data.obj_list" :key="item.id">
 				<td>{{item.text}}</td>
 				<td>{{item.key}}</td>
 				<td>{{item.posted}}</td>
+				<td><button @click="loclDelete(index)">Delete</button></td>
 			</tr>
 		</tbody>
 	</table>
@@ -163,6 +167,7 @@ export default {
                     text: CaesarCipher(text, rot_key, ed_flag),
                     key: rot_key,
                     user: user.displayName,
+                    uid: user.uid,
                     posted: timeId.time,
                     cryptType: 'CaesarCipher',
                 }
@@ -178,10 +183,20 @@ export default {
                 }
                 data.obj_list.unshift(lcl_obj)
                 console.log('doAction local' + JSON.stringify(lcl_obj))
-                console.log('data.obj_list' + data.obj_list)
+                console.log('data.obj_list' + JSON.stringify(data.obj_list))
             }
             
         }
+	
+        const loclDelete = (index)=> {
+		console.log('locl delete' + JSON.stringify(data.obj_list[index]))
+		data.obj_list.splice(index, 1)
+        }
+	
+        const fireRemove = (key)=> {
+		console.log('fire delete' + JSON.stringify(data.fire_data[key]))
+		firebase.database().ref('data').child(key).remove()	
+	}
 
         const login = ()=> {
             firebase.auth().signInWithPopup(provider).then((result)=> {
@@ -195,6 +210,7 @@ export default {
                             text: item.text,
                             key: item.key,
                             user: firebase.auth().currentUser.displayName,
+                            uid: firebase.auth().currentUser.uid,
                             posted: item.posted,
                             cryptType: 'CaesarCipher',
                         }
@@ -204,17 +220,12 @@ export default {
                     data.obj_list = []
                     console.log('Login and push local obj')
                 }
-                firebase.database().ref('data').orderByChild('user').equalTo(firebase.auth().currentUser.displayName).on('value', (snapshot)=>{
+                firebase.database().ref('data').orderByChild('uid').equalTo(firebase.auth().currentUser.uid).on('value', (snapshot)=>{
                     if (firebase.auth().currentUser != null) {
-                        console.log('get snap'+snapshot)
-                        let arr = []
+                        console.log('get snap'+ JSON.stringify(snapshot))
                         let result = snapshot.val()
-                        console.log('get result' + result)
-                        for(let item in result){
-                            arr.unshift(result[item])
-                        }
-                        console.log('get arr' + arr)
-                        data.fire_data = arr
+                        console.log('get result' + JSON.stringify(result))
+                        data.fire_data = result
                         data.status_msg = 'Logout'
                     } else {
                         data.fire_data = {}
@@ -238,9 +249,10 @@ export default {
             } else {
                 logout()
             }
+
         }
 
-        return { data, CaesarCipher, doAction, login, logout, doLogin, getCreateTimeId }
+        return { data, CaesarCipher, doAction, login, logout, doLogin, getCreateTimeId, loclDelete, fireRemove }
     }
 }
 </script>
@@ -263,7 +275,7 @@ header p {
 header button { 
 	margin-right: 20px;
 	padding: 10px;
-	background-color: skyblue;
+	background-color: black;
 	color: white;
 }
 
@@ -277,6 +289,7 @@ main {
 section > h1 { 
 	font-size: 50px;
 	padding-top: 25px;
+	margin-top: 0px;
 }
 
 section > button {
@@ -299,11 +312,15 @@ thead th:nth-child(1) {
 }
 
 thead th:nth-child(2) {
-  width: 10%;
+  width: 5%;
 }
 
 thead th:nth-child(3) {
-  width: 30%;
+  width: 25%;
+}
+
+thead th:nth-child(4) {
+  width: 10%;
 }
 
 tbody td:nth-child(1) {
