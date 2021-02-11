@@ -45,11 +45,11 @@
 			</tr>
 		</thead>
 		<tbody>
-			<tr v-for="(item, key) in data.fire_data" :key="key">
+			<tr v-for="(item, index) in data.fire_data" :key="item.id">
 				<td>{{item.text}}</td>
 				<td>{{item.key}}</td>
 				<td>{{item.posted}}</td>
-				<td><button @click="fireRemove(key)">Delete</button></td>
+				<td><button @click="fireRemove(item.id, index)">Delete</button></td>
 			</tr>
 		</tbody>
 	</table>
@@ -97,7 +97,6 @@ console.log(process.env.VUE_APP_FIREBASE_API_KEY)
 firebase.initializeApp(firebaseConfig);
 
 var provider = new firebase.auth.GoogleAuthProvider()
-//const fdata = firebase.database().ref('data/')
 
 
 export default {
@@ -109,7 +108,7 @@ export default {
             obj_list: [],
             status_msg: 'Login',
             user: null,
-            fire_data: {},
+            fire_data: [],
         })
 
         const CaesarCipher = (str, rot, x)=> {
@@ -159,11 +158,12 @@ export default {
         const doAction = (text, rot_key, ed_flag)=> {
             console.log(text, rot_key, ed_flag)
             let timeId = getCreateTimeId()
-            let id = timeId.id
-            
+            let id = timeId.id 
             if(data.user != null){
                 let user = firebase.auth().currentUser
+		let uid = user.uid
                 let obj = {
+                    id: id,
                     text: CaesarCipher(text, rot_key, ed_flag),
                     key: rot_key,
                     user: user.displayName,
@@ -171,7 +171,7 @@ export default {
                     posted: timeId.time,
                     cryptType: 'CaesarCipher',
                 }
-                firebase.database().ref('data/' + id).set(obj)
+                firebase.database().ref('data/' + uid + '/' + id).set(obj)
                 console.log('doAction firebase' + JSON.stringify(obj))
             } else {
                 let lcl_obj = {
@@ -193,9 +193,9 @@ export default {
 		data.obj_list.splice(index, 1)
         }
 	
-        const fireRemove = (key)=> {
-		console.log('fire delete' + JSON.stringify(data.fire_data[key]))
-		firebase.database().ref('data').child(key).remove()	
+        const fireRemove = (key, index)=> {
+		console.log('fire delete' + JSON.stringify(data.fire_data[index]))
+		firebase.database().ref('data' + '/' + firebase.auth().currentUser.uid ).child(key).remove()	
 	}
 
         const login = ()=> {
@@ -206,29 +206,35 @@ export default {
                     data.obj_list.forEach(item => {
                         console.log(' item ' + JSON.stringify(item))
                         let id = item.id
+			let uid = firebase.auth().currentUser.uid 
                         let obj = {
+                            id: id,
                             text: item.text,
                             key: item.key,
                             user: firebase.auth().currentUser.displayName,
-                            uid: firebase.auth().currentUser.uid,
+                            uid: uid,
                             posted: item.posted,
                             cryptType: 'CaesarCipher',
                         }
-                        firebase.database().ref('data/' + id).set(obj)
+                        firebase.database().ref('data/' + uid + '/' + id).set(obj)
                         console.log('push item ' + JSON.stringify(item))
                     });
                     data.obj_list = []
                     console.log('Login and push local obj')
                 }
-                firebase.database().ref('data').orderByChild('uid').equalTo(firebase.auth().currentUser.uid).on('value', (snapshot)=>{
+                firebase.database().ref('data' + '/' + firebase.auth().currentUser.uid + '/').on('value', (snapshot)=>{
                     if (firebase.auth().currentUser != null) {
                         console.log('get snap'+ JSON.stringify(snapshot))
                         let result = snapshot.val()
                         console.log('get result' + JSON.stringify(result))
-                        data.fire_data = result
+			let list = []
+			for(let item in result) {
+				list.unshift(result[item])
+			}
+			data.fire_data = list
                         data.status_msg = 'Logout'
                     } else {
-                        data.fire_data = {}
+                        data.fire_data = [] 
                     }
                 })
             })
